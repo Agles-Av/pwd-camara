@@ -46,7 +46,7 @@ function takePhoto() {
     return;
   }
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, 0, 0, 320, 240);
 
   const imageDataURL = canvas.toDataURL('image/png');
   console.log('Foto capturada:', imageDataURL.substring(0, 50) + '...');
