@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <title>Cámara PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #00bcd4;
+    }
+    button {
+      background-color: #00bcd4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #444;
+      cursor: not-allowed;
+    }
+    #cameraContainer {
+      display: none;
+      margin-top: 20px;
+    }
+    video, canvas {
+      width: 320px;
+      height: 240px;
+      border-radius: 10px;
+      border: 2px solid #00bcd4;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📷 Cámara PWA</h1>
+  <button id="openCamera">Abrir Cámara</button>
+
+  <div id="cameraContainer">
+    <video id="video" autoplay></video><br />
+    <button id="takePhoto">Tomar Foto</button>
+    <canvas id="canvas" width="320" height="240"></canvas>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registrado correctamente'))
+        .catch(err => console.error('Error registrando el Service Worker:', err));
+    }
+  </script>
+</body>
+</html>
