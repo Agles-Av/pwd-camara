@@ -159,37 +159,46 @@ function limpiarGaleria() {
     console.error('Error al limpiar la galería:', request.error);
   };
 }
+// 🔄 Verificar cámaras disponibles (modificada)
+async function checkMultipleCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-// 🔄 Cambiar cámara
+    if (videoDevices.length > 1) {
+      console.log('Dispositivo con múltiples cámaras detectado.');
+      switchCameraBtn.disabled = false;
+      switchCameraBtn.title = "Cambiar entre cámara frontal y trasera";
+    } else {
+      console.warn('Solo hay una cámara disponible en este dispositivo.');
+      switchCameraBtn.disabled = false; // 🔥 Siempre visible
+      switchCameraBtn.title = "Este dispositivo solo tiene una cámara.";
+    }
+  } catch (error) {
+    console.error('Error al verificar cámaras:', error);
+    switchCameraBtn.disabled = false;
+    switchCameraBtn.title = "No se pudo determinar las cámaras disponibles.";
+  }
+}
+
+// 🔄 Cambiar cámara (ajustada)
 async function switchCamera() {
   if (!stream) {
     alert('Primero abre la cámara');
     return;
   }
-  // Cambiar entre cámara frontal y trasera
+
+  // Cambiar entre frontal y trasera
   const newFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
   try {
     await openCamera(newFacingMode);
   } catch (error) {
-    console.error('Error al cambiar de cámara:', error);
-    alert('Error al cambiar de cámara. Es posible que su dispositivo no tenga múltiples cámaras.');
+    console.error('Error al cambiar cámara:', error);
+    alert('No se pudo cambiar la cámara. Puede que este dispositivo solo tenga una.');
   }
 }
 
-// Ocultar el botón de cambiar cámara si no hay múltiples cámaras disponibles
-async function checkMultipleCameras() {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(device => device.kind === 'videoinput');
-    switchCameraBtn.style.display = videoDevices.length > 1 ? 'inline-block' : 'none';
-  } catch (error) {
-    console.error('Error al verificar cámaras:', error);
-    switchCameraBtn.style.display = 'none';
-  }
-}
 
-// Verificar cámaras disponibles al cargar
-checkMultipleCameras();
 
 // Eventos
 openCameraBtn.addEventListener('click', () => openCamera(currentFacingMode));
