@@ -32,19 +32,26 @@ const openCameraBtn = document.getElementById('openCamera');
 const cameraContainer = document.getElementById('cameraContainer');
 const video = document.getElementById('video');
 const takePhotoBtn = document.getElementById('takePhoto');
+const switchCameraBtn = document.getElementById('switchCamera');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const gallery = document.getElementById('gallery');
 const clearGalleryBtn = document.getElementById('clearGallery');
 
 let stream = null;
+let currentFacingMode = 'environment';
 
 // 📹 Abrir la cámara
-async function openCamera() {
+async function openCamera(facingMode = currentFacingMode) {
   try {
+    // Si hay un stream activo, detenerlo
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+
     const constraints = {
       video: {
-        facingMode: { ideal: 'environment' },
+        facingMode: { ideal: facingMode },
         width: { ideal: 320 },
         height: { ideal: 240 }
       }
@@ -52,6 +59,7 @@ async function openCamera() {
 
     stream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = stream;
+    currentFacingMode = facingMode;
 
     cameraContainer.style.display = 'block';
     openCameraBtn.textContent = 'Cámara Abierta';
@@ -152,9 +160,41 @@ function limpiarGaleria() {
   };
 }
 
+// 🔄 Cambiar cámara
+async function switchCamera() {
+  if (!stream) {
+    alert('Primero abre la cámara');
+    return;
+  }
+  // Cambiar entre cámara frontal y trasera
+  const newFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+  try {
+    await openCamera(newFacingMode);
+  } catch (error) {
+    console.error('Error al cambiar de cámara:', error);
+    alert('Error al cambiar de cámara. Es posible que su dispositivo no tenga múltiples cámaras.');
+  }
+}
+
+// Ocultar el botón de cambiar cámara si no hay múltiples cámaras disponibles
+async function checkMultipleCameras() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+    switchCameraBtn.style.display = videoDevices.length > 1 ? 'inline-block' : 'none';
+  } catch (error) {
+    console.error('Error al verificar cámaras:', error);
+    switchCameraBtn.style.display = 'none';
+  }
+}
+
+// Verificar cámaras disponibles al cargar
+checkMultipleCameras();
+
 // Eventos
-openCameraBtn.addEventListener('click', openCamera);
+openCameraBtn.addEventListener('click', () => openCamera(currentFacingMode));
 takePhotoBtn.addEventListener('click', takePhoto);
 clearGalleryBtn.addEventListener('click', limpiarGaleria);
+switchCameraBtn.addEventListener('click', switchCamera);
 
 window.addEventListener('beforeunload', closeCamera);
